@@ -13,7 +13,6 @@ from tensorflow.keras.models import load_model
 import pickle
 
 
-
 def save_obj(obj: object, name: str):
     """
     Save a data-type of interest as a .pkl file
@@ -60,7 +59,7 @@ st.cache()
 
 def load_data():
     # data_dir = pathlib.Path("/home/tristan/Desktop/CodingProjects/trg880/capstone/data/Training")
-    class_names=load_obj('class_names')
+    class_names = load_obj('class_names')
     # class_names = np.array(sorted([item.name for item in data_dir.glob('*') if item.name != "LICENSE.txt"]))
 
     return class_names
@@ -126,6 +125,35 @@ def pred(input_image):
     ))
 
 
+def mostFrequent(arr, n):
+    # Sort the array
+    arr.sort()
+
+    # find the max frequency using
+    # linear traversal
+    max_count = 1;
+    res = arr[0];
+    curr_count = 1
+
+    for i in range(1, n):
+        if (arr[i] == arr[i - 1]):
+            curr_count += 1
+
+        else:
+            if (curr_count > max_count):
+                max_count = curr_count
+                res = arr[i - 1]
+
+            curr_count = 1
+
+    # If last element is most frequent
+    if (curr_count > max_count):
+        max_count = curr_count
+        res = arr[n - 1]
+
+    return res
+
+
 def pred_ensembles(input_image):
     img_height = 100
     img_width = 100
@@ -137,15 +165,18 @@ def pred_ensembles(input_image):
     img_array = tf.expand_dims(img_array, 0)
 
     # predictions
-    results = np.zeros((3, 131))
+    results = np.zeros((3, 1))
     for j in range(3):
-        results += ensembles[j].predict(img_array)
-    pred = [model.predict(img_array) for model in ensembles]
+        results += np.argmax(ensembles[j].predict(img_array))
 
+    n = len(results)
+    item = mostFrequent(results, n)
+    item = int(item)
+    obj = class_names[item]
     # print(results)
     st.write(
-        "This image most likely belongs to {} with a {:.2f} percent confidence."
-            .format(class_names[np.argmax(results)], 100 * np.max(pred))
+        "Based on an ensemble apporach, the image belongs to {}"
+            .format(obj)
     )
 
 
