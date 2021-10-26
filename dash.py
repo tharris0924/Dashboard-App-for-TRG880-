@@ -119,6 +119,7 @@ def pred(input_image):
     img_array = tf.expand_dims(img_array, 0)  # Create a batch
     predictions = cnn.predict(img_array)
     score = predictions[0]
+    print(np.argmax(score))
     st.write((
         "This image most likely belongs to {} with a {:.2f} percent confidence."
             .format(class_names[np.argmax(score)], 100 * np.max(score))
@@ -165,12 +166,17 @@ def pred_ensembles(input_image):
     img_array = tf.expand_dims(img_array, 0)
 
     # predictions
-    results = np.zeros((3, 1))
+    results = np.zeros((3, 131))
     for j in range(3):
-        results += np.argmax(ensembles[j].predict(img_array))
+        results += ensembles[j].predict(img_array)[0]
+    score1 = np.argmax(results[0])
+    score2 = np.argmax(results[1])
+    score3 = np.argmax(results[2])
+    scores = [score1, score2, score3]
 
-    n = len(results)
-    item = mostFrequent(results, n)
+    print(scores)
+    n = len(scores)
+    item = mostFrequent(scores, n)
     item = int(item)
     obj = class_names[item]
     # print(results)
